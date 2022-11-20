@@ -1,17 +1,18 @@
 import logging
 
-log = logging.getLogger()
-log.setLevel('DEBUG')
+from cassandra.cluster import Cluster
+from cassandra.cqlengine.connection import (
+    register_connection, 
+    set_default_connection
+)
+
+log = logging.getLogger('cassandra')
+log.setLevel('INFO')
 handler = logging.StreamHandler()
 handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
 log.addHandler(handler)
 
-from cassandra import ConsistencyLevel
-from cassandra.cluster import Cluster
-from cassandra.query import SimpleStatement
-
-KEYSPACE = "scraper_app"
-
+KEYSPACE = "scrapper_app"
 
 def get_cluster():
     log.info("connecting cassandra...")
@@ -31,13 +32,16 @@ def get_session():
     cluster = get_cluster()
     session = cluster.connect()
     set_settion(session)
+    register_connection(str(session), session=session)
+    set_default_connection(str(session))
     return session
 
 if __name__ == "__main__":    
     session = get_session()
     row = session.execute('select release_version from system.local').one()
-    if row:
-        print(row[0])
-    else :
-        print("An error occurred")
+    print(row)
+    # if row:
+    #     print(row[0])
+    # else :
+    #     print("An error occurred")
  
