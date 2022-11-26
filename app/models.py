@@ -9,7 +9,7 @@ class Product(Model):
     price_str = columns.Text(default='-100')
 
 # Detail View for asin
-class ProductScrpeEvent(Model):
+class ProductScrapeEvent(Model):
     __keyspace__ = "scrapper_app"
     uuid = columns.UUID(primary_key=True)
     asin = columns.Text(index=True)

@@ -5,6 +5,9 @@ from cassandra.cqlengine.connection import (
     register_connection, 
     set_default_connection
 )
+from . import config
+
+settings = config.get_settings()
 
 log = logging.getLogger('cassandra')
 log.setLevel('INFO')
@@ -16,7 +19,11 @@ KEYSPACE = "scrapper_app"
 
 def get_cluster():
     log.info("connecting cassandra...")
-    return Cluster(['127.0.0.1'])
+    return Cluster(
+        contact_points=['127.0.0.1'],
+        load_balancing_policy=None,
+        protocol_version=3
+    )
 
 def set_settion(session):
     log.info('set settion...')
@@ -40,8 +47,3 @@ if __name__ == "__main__":
     session = get_session()
     row = session.execute('select release_version from system.local').one()
     print(row)
-    # if row:
-    #     print(row[0])
-    # else :
-    #     print("An error occurred")
- 
