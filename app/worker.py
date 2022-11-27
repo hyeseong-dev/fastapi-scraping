@@ -40,6 +40,10 @@ def celery_on_startup(*args, **kwargs):
 beat_init.connect(celery_on_startup)
 worker_process_init.connect(celery_on_startup)
 
+@celery_app.on_after_configure.connect
+def setup_periodic_tasks(sender, *args, **kwargs):
+    sender.add_periodic_task(1, random_task.s("hello"), expires=10)
+
 @celery_app.task
 def random_task(name):
     print(f"Who throws a shoe. Honestly {name}.")
