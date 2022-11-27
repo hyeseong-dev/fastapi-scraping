@@ -1,3 +1,5 @@
+import time
+from dataclasses import dataclass
 from fake_useragent import UserAgent
 
 from selenium import webdriver
@@ -7,7 +9,11 @@ from selenium.webdriver.chrome.webdriver import WebDriver
 def get_user_agent():
     return UserAgent(verify_ssl=False).random
 
+@dataclass
 class Scraper:
+    url: str
+    endless_scroll : bool = False
+    endless_scroll_time: int = 5
     driver: WebDriver = None
 
     def get_driver(self):
@@ -19,4 +25,23 @@ class Scraper:
             options.add_argument(f"user-agent={user_agent}")
             self.driver = webdriver.Chrome(options=options)
         return self.driver
+
+    def perform_scroll(self, driver: WebDriver=None):
+        if driver is None:
+            return 
+        if self.endless_scroll:
+            current_height = driver.execute_script("return document.body.scrollHeight")
+            while True:
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
+                time.sleep(self.endless_scroll_time)
+                iter_height = driver.execute_script("return document.body.scrollHeight")
+                if current_height == iter_height:
+                    break
+                current_height = iter_height 
+
+    def get(self):
+        driver = self.get_driver()
+        driver.get(self.url)
+        self.perform_scroll()
+        return driver.page_source
 
